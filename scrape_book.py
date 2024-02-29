@@ -58,6 +58,7 @@ else:
 
 
 ###Partie II####
+    #extraire les urls de tous les livres de la catégorie TRAVEL
 
 def extract_category_urls(category_url):
     
@@ -74,7 +75,7 @@ def extract_category_urls(category_url):
             book_url = urllib.parse.urljoin(category_url, book_url)
             book_urls.append(book_url)
 
-        # Check for pagination and extract book URLs from other pages if necessary
+        # 
         next_page = soup.find('li', class_='next')
         if next_page:
             next_page_url = next_page.find('a')['href']
@@ -88,6 +89,7 @@ category_url = 'https://books.toscrape.com/catalogue/category/books/travel_2/ind
 travel_book_urls = extract_category_urls(category_url)
 print(travel_book_urls)
 
+# extraire les données de chaque livre à partir de ces URLs
 def extract_book_data(book_url):
     
     book_data = {}
@@ -120,6 +122,7 @@ def extract_books_data(category_urls):
 
     return books_data
 
+#fichier csv pour stocker les données
 def write_to_csv(data, filename):
     
     if data:
@@ -143,9 +146,7 @@ write_to_csv(travel_books_data, 'travel_books.csv')
 
 
 ###Partie III###
-
-
-
+# extraire les urls des livres pour une catégorie
 def extract_category_urls(category_url):
     book_urls = []
     response = requests.get(category_url)
@@ -156,6 +157,8 @@ def extract_category_urls(category_url):
             book_url = book.find('a')['href']
             book_url = urllib.parse.urljoin(category_url, book_url)
             book_urls.append(book_url)
+
+            #vérifier la présence d'une page suivante pour extraire les URLs des livres supplémentaires
         next_page = soup.find('li', class_='next')
         if next_page:
             next_page_url = next_page.find('a')['href']
@@ -163,6 +166,7 @@ def extract_category_urls(category_url):
             book_urls += extract_category_urls(next_page_url)
     return book_urls
 
+# extraire les données de chaque livre à partir de son URL
 def extract_book_data(book_url):
     book_data = {}
     response = requests.get(book_url)
@@ -257,9 +261,8 @@ category_urls = [
     'https://books.toscrape.com/catalogue/category/books/cultural_49/index.html',
     'https://books.toscrape.com/catalogue/category/books/erotica_50/index.html',
     'https://books.toscrape.com/catalogue/category/books/crime_51/index.html'
-    # Ajoutez ici les autres URLS de catégories de livres
+    
 ]
-
 # Extraire les données de tous les livres
 books_data = extract_books_data(category_urls)
 
@@ -273,28 +276,22 @@ for idx, category_data in enumerate(books_data):
 
 ###Partie IV####
 # Fonction pour télécharger les images
-from urllib.parse import urljoin
-
-# Fonction pour télécharger les images
 def download_images(books_data):
     for category_books in books_data:
         for book_data in category_books:
             image_url = book_data['image_url']
-            # Construire l'URL absolue de l'image
             absolute_image_url = urljoin('https://books.toscrape.com/catalogue/', image_url)
             # Télécharger l'image
             response = requests.get(absolute_image_url)
             if response.status_code == 200:
                 # Extraire le nom de fichier à partir de l'URL
                 image_filename = image_url.split('/')[-1]
-                # Enregistrer l'image avec le nom de fichier approprié dans le dossier "images"
                 with open(f'images/{image_filename}', 'wb') as f:
                     f.write(response.content)
                 print(f"Image {image_filename} téléchargée avec succès.")
             else:
                 print(f"Erreur lors du téléchargement de l'image {image_url}: {response.status_code}")
 
-# Appel de la fonction pour télécharger les images
 download_images(books_data)
 
 
@@ -329,5 +326,5 @@ book_counts = list(books_per_category.values())
 plt.figure(figsize=(10, 6))
 plt.pie(book_counts, labels=categories, autopct='%1.1f%%', startangle=140)
 plt.title('Number of Books per Category')
-plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+plt.axis('equal')  
 plt.show()
